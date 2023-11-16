@@ -1,21 +1,21 @@
-import {Navigate, Outlet} from "react-router-dom";
+import {Navigate, NavigateProps, Outlet} from 'react-router-dom';
+import {useCookies} from 'react-cookie';
+import React from 'react';
 
-// import {useCookies} from 'react-cookie';
+type _authType = {
+    email: string,
+    ttl: number,
+    roles: Array<string>
+}
 
-const SecuredRoute = ( ) => {
-    // const { auth } = useAuthContext();
-    // const [cookies] = useCookies(['_auth']);
+const SecuredRoute = (): NavigateProps | React.ReactElement => {
+    const [cookies] = useCookies(['_auth']);
 
-    // const cookie = cookies._auth
+    const cookie: _authType|undefined  = cookies._auth;
 
-    const isCookkie = true;
-    if (!isCookkie) {
-        return <Navigate to='/login' replace />
+    if (cookie === undefined) {
+        return <Navigate to='/login' replace/>
     }
-
-    // if (cookie === undefined) {
-    //     return <Navigate to='/login' replace/>
-    // }
 
     return <Outlet />;
 }

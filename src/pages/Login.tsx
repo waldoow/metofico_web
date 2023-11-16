@@ -1,119 +1,108 @@
-import React from 'react'
-import { useFormik } from "formik";
+import React from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { useCookies } from 'react-cookie';
+import { Input } from "@/components/ui/input"
+import { useNavigate} from 'react-router-dom';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card"
+
+
+const formSchema = z.object({
+    username: z.string().email("Invalid email"),
+    password: z.string()
+});
 
 const Login: React.FC = () => {
-    const formik = useFormik({
-        initialValues: {
-            email: '',
+    const [, setCookie] = useCookies();
+    const navigate = useNavigate();
+    const form = useForm<z.infer<typeof formSchema>>({
+        mode: 'onChange',
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            username: '',
             password: ''
-        },
-        onSubmit: values => console.log(values)
-    })
+        }
+    });
+
+    const onSubmit = async (values: z.infer<typeof formSchema>)=> {
+        const params = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-From': 'web'
+            },
+            body: JSON.stringify(values)
+        };
+
+        const response = await fetch('/api/login_check', params);
+        if (response.ok) {
+            const json = await response.json();
+
+            setCookie('_auth', json, { maxAge: json.ttl });
+            navigate('/dashboard');
+        }
+    };
 
     return (
-        <section
-            className='h-screen flex flex-col items-center justify-center bg-coolGray-900'
-            style={{
-                backgroundImage: 'url("flex-ui-assets/elements/pattern-dark.svg")',
-                backgroundPosition: 'center',
-            }}
-        >
-            <div className='container px-4 mx-auto'>
-                <div className='relative max-w-xl mx-auto pt-14 pb-16 px-8 bg-white rounded-2xl'>
-                    <a
-                        className='absolute top-0 left-1/2 transform -translate-y-1/2 -translate-x-1/2 inline-block'
-                        href='#'
-                    >
-                        <img
-                            className='h-16'
-                            src='flex-ui-assets/logos/flex-circle-green.svg'
-                            alt=''
-                        />
-                    </a>
-                    <div className='max-w-sm mx-auto'>
-                        <div className='mb-6 text-center'>
-                            <h3 className='mb-4 text-2xl md:text-3xl font-bold'>
-                                Sign in to your account
-                            </h3>
-                        </div>
-                        <form onSubmit={formik.handleSubmit}>
-                            <div className='mb-6'>
-                                <label
-                                    className='block mb-2 text-coolGray-800 font-medium'
-                                    htmlFor='email'
-                                >
-                                    Email
-                                </label>
-                                <input
-                                    className='appearance-none block w-full p-3 leading-5 text-coolGray-900 border border-coolGray-200 rounded-lg drop-shadow-sm placeholder-coolGray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'
-                                    type='email'
-                                    placeholder='dev@shuffle.dev'
-                                    id='email'
-                                    onChange={formik.handleChange}
-                                    value={formik.values.email}
-                                />
-                            </div>
-                            <div className='mb-4'>
-                                <label
-                                    className='block mb-2 text-coolGray-800 font-medium'
-                                    htmlFor='password'
-                                >
-                                    Password
-                                </label>
-                                <input
-                                    className='appearance-none block w-full p-3 leading-5 text-coolGray-900 border border-coolGray-200 rounded-lg drop-shadow-sm placeholder-coolGray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50'
-                                    type='password'
-                                    placeholder='************'
-                                    id='password'
-                                    onChange={formik.handleChange}
-                                    value={formik.values.password}
-                                />
-                            </div>
-                            <div className='flex flex-wrap items-center justify-between mb-6'>
-                            {/*    <div className='w-full md:w-1/2'>*/}
-                            {/*        <label className='relative inline-flex items-center'>*/}
-                            {/*            <input*/}
-                            {/*                className='form-checkbox appearance-none'*/}
-                            {/*                type='checkbox'*/}
-                            {/*            />*/}
-                            {/*            <img*/}
-                            {/*                className='absolute top-1/2 transform -translate-y-1/2 left-0'*/}
-                            {/*                src='flex-ui-assets/elements/sign-up/checkbox-icon.svg'*/}
-                            {/*                alt=''*/}
-                            {/*            />*/}
-                            {/*            <span className='ml-7 text-xs text-coolGray-800 font-medium'>*/}
-                            {/*                Remember me*/}
-                            {/*            </span>*/}
-                            {/*        </label>*/}
-                            {/*    </div>*/}
-                                <div className='w-full md:w-auto mt-1'>
-                                    <a
-                                        className='inline-block text-xs font-medium text-green-500 hover:text-green-600'
-                                        href='#'
-                                    >
-                                        Forgot your password?
-                                    </a>
-                                </div>
-                            </div>
-                            <button
-                                type='submit'
-                                className='inline-block py-3 px-7 mb-6 w-full text-base text-green-50 font-medium text-center leading-6 bg-green-500 hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 rounded-md shadow-sm'
-                            >
-                                Sign In
-                            </button>
-                            {/*<p className='text-center'>*/}
-                            {/*    <span className='text-xs font-medium'>Don’t have an account?</span>*/}
-                            {/*    <a*/}
-                            {/*        className='inline-block text-xs font-medium text-green-500 hover:text-green-600 hover:underline'*/}
-                            {/*        href='#'*/}
-                            {/*    >*/}
-                            {/*        Sign up*/}
-                            {/*    </a>*/}
-                            {/*</p>*/}
+        <section className={'min-h-screen flex flex-col justify-center lg:max-w-5xl m-auto space-y-16'}>
+            <Card className="w-5/6 lg:w-1/2 m-auto">
+                <CardHeader>
+                    <CardTitle>
+                        Sign in to your account
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                            <FormField
+                                control={form.control}
+                                name="username"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="john.doe@mail.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="password" {...field} type='password' />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <Button className='mt-12 w-full' type="submit">Submit</Button>
                         </form>
-                    </div>
-                </div>
-            </div>
+                    </Form>
+                </CardContent>
+            </Card>
         </section>
     )
 }
