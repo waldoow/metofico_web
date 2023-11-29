@@ -1,12 +1,10 @@
 import {Link} from 'react-router-dom';
-import React, {useState} from 'react';
+import React from 'react';
 import { cn } from "@/lib/utils"
-import {Button, buttonVariants} from '@/components/ui/button';
+import {Button} from '@/components/ui/button';
 import usePath from '@/hooks/usePath';
 import {useCookies} from 'react-cookie';
-import UserAccountActionsToggle from '@/components/navigation/UserAccountActionsToggle';
-import {HiMiniBars2, HiOutlineXMark} from 'react-icons/hi2';
-
+import UserAccountActionsToggle from '@/components/navigation/user-account-actions-toggle';
 import {
     Tooltip,
     TooltipContent,
@@ -15,6 +13,12 @@ import {
 } from "@/components/ui/tooltip"
 
 import {IconType} from 'react-icons';
+import {getUserRole} from '@/services/user.service.ts';
+import {HiChevronDoubleLeft, HiChevronDoubleRight} from 'react-icons/hi';
+import {Separator} from '@/components/ui/separator.tsx';
+import {Badge} from '@/components/ui/badge.tsx';
+import {useSidebarState} from '@/hooks/useSidebarState.ts';
+// import {SidebarContext} from '@/context/sidebar-provider.tsx';
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
     items: {
@@ -25,26 +29,36 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
-    const [open, setOpen] = useState(true);
+    // const { isOpen, setIsOpen } = useContext(SidebarContext);
+
+    const { isOpen, setIsOpen } = useSidebarState()
+
     const path = usePath();
     const [cookie] = useCookies(['_auth'])
 
     return (
         <aside
-            className={` flex flex-col justify-between border-e h-full p-6 ${open ? 'w-72' : 'w-30'} duration-300`}
+            className={`flex flex-col justify-between border-e h-full p-6 ease-in-out duration-500 ${isOpen ? 'w-72' : 'w-30'} `}
         >
             <div className='w-full space-x-2 mb-14 relative'>
-                <Button size="sm" className="absolute end-0.5" onClick={() => setOpen(!open)}>
+                <Button size="icon" className={`absolute ${isOpen ? 'right-2': 'left-1/2 transform -translate-x-1/2'}`} onClick={() => setIsOpen(!isOpen)}>
                     {
-                        open ?
-                            <HiOutlineXMark />:
-                            <HiMiniBars2 />
+                        isOpen ?
+                            <HiChevronDoubleLeft />:
+                            <HiChevronDoubleRight />
                     }
                 </Button>
             </div>
+
+            <h1 className={`font-bold text-primary text-5xl capitalize tracking-tighter  ${isOpen ? '': 'text-center'}`}>
+                {isOpen ? 'metofico': 'm'}
+            </h1>
+
+            <Separator className="bg-primary my-2"/>
+
             <nav
                 className={cn(
-                    "flex space-x-2 flex-col  gap-3 lg:space-x-0 lg:space-y-1 grow lg:p-3",
+                    "flex space-x-2 flex-col gap-1 lg:space-x-0 lg:space-y-1 grow lg:p-3 w-full",
                     className
                 )}
 
@@ -52,43 +66,44 @@ const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
             >
                 {items.map((item) => {
                     const current = path === item.href;
-
+                    const variant = current ? 'secondary': 'ghost'
                     return (
-                        <Link
-                            key={item.href}
-                            to={item.href}
-                            className={cn(
-                                buttonVariants({variant: "ghost"}),
-                                current
-                                    ? "bg-muted hover:bg-muted"
-                                    : "hover:bg-transparent hover:underline",
-                                `${open ? 'justify-start gap-5': 'justify-center'} flex items-center `
-                            )}
-                        >
+                        <Button asChild key={item.href} variant={variant} className={cn(
+                            `${isOpen ? 'justify-start': 'justify-center'} flex items-center`
+                        )}>
+                             <Link to={item.href}>
+                                 { isOpen ?
+                                     <></> :
+                                     <TooltipProvider delayDuration={100} >
+                                         <Tooltip  >
+                                             <TooltipTrigger className="relative">
+                                                 <Button size='icon' variant={'ghost'}>
+                                                     <item.icon size={'18'}/>
+                                                 </Button>
+                                             </TooltipTrigger>
+                                             <TooltipContent className="absolute left-6 -top-1">
+                                                 <p> { item.title }</p>
+                                             </TooltipContent>
+                                         </Tooltip>
+                                     </TooltipProvider>
+                                 }
 
-                            { open ?
-                                <></> :
-                                <TooltipProvider delayDuration={0} >
-                                    <Tooltip  >
-                                        <TooltipTrigger className="relative">
-                                            <item.icon />
-                                        </TooltipTrigger>
-                                        <TooltipContent className="absolute" alignOffset={150}>
-                                            <p>{ item.title }</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            }
-
-                            <span className={`${open ? '': 'hidden'} `}>{ item.title }</span>
-                        </Link>
-                    )
+                                 <span className={`${isOpen ? '': 'hidden'} `}>{ item.title }</span>
+                             </Link>
+                        </Button>
+                    );
                 })}
             </nav>
 
-            <div className={`${open ? '': 'm-auto'}`}>
+            <Separator className="bg-primary my-4"/>
+
+            <div className={`${isOpen ? '': 'm-auto'}`}>
                 <div className="flex flex-row justify-between items-center">
-                    <span className={`${open ? '': 'hidden'} text-muted-foreground text-sm`}>{ cookie._auth.email }</span>
+                    <div className={`${isOpen ? '': 'hidden'} space-y-2  text-sm`}>
+                        <p>{ cookie._auth.email }</p>
+                        <Badge>{ getUserRole(cookie._auth.roles) }</Badge>
+                    </div>
+
                     <UserAccountActionsToggle />
                 </div>
             </div>
