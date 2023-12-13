@@ -18,7 +18,7 @@ import {HiChevronDoubleLeft, HiChevronDoubleRight} from 'react-icons/hi';
 import {Separator} from '@/components/ui/separator.tsx';
 import {Badge} from '@/components/ui/badge.tsx';
 import {useSidebarState} from '@/hooks/useSidebarState.ts';
-// import {SidebarContext} from '@/context/sidebar-provider.tsx';
+import { motion } from 'framer-motion'
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
     items: {
@@ -29,16 +29,20 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
-    // const { isOpen, setIsOpen } = useContext(SidebarContext);
-
     const { isOpen, setIsOpen } = useSidebarState()
-
     const path = usePath();
     const [cookie] = useCookies(['_auth'])
 
+    const variants= {
+        close: {width: '10%'},
+        open: {width: '20%'}
+    };
+
     return (
-        <aside
-            className={`flex flex-col justify-between border-e h-full p-6 ease-in-out duration-500 ${isOpen ? 'w-72' : 'w-30'} `}
+        <motion.aside
+            variants={variants}
+            animate={isOpen ? 'open': 'close'}
+            className={`flex flex-col justify-between border-e h-full p-6 ease-in-out duration-500  `}
         >
             <div className='w-full space-x-2 mb-14 relative'>
                 <Button size="icon" className={`absolute ${isOpen ? 'right-2': 'left-1/2 transform -translate-x-1/2'}`} onClick={() => setIsOpen(!isOpen)}>
@@ -50,7 +54,7 @@ const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
                 </Button>
             </div>
 
-            <h1 className={`font-bold text-primary text-5xl capitalize tracking-tighter  ${isOpen ? '': 'text-center'}`}>
+            <h1 className={`font-bold text-primary text-2xl capitalize tracking-tighter  ${isOpen ? '': 'text-center'}`}>
                 {isOpen ? 'metofico': 'm'}
             </h1>
 
@@ -67,28 +71,35 @@ const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
                 {items.map((item) => {
                     const current = path === item.href;
                     const variant = current ? 'secondary': 'ghost'
+
                     return (
                         <Button asChild key={item.href} variant={variant} className={cn(
                             `${isOpen ? 'justify-start': 'justify-center'} flex items-center`
                         )}>
-                             <Link to={item.href}>
-                                 { isOpen ?
-                                     <></> :
-                                     <TooltipProvider delayDuration={100} >
-                                         <Tooltip  >
-                                             <TooltipTrigger className="relative">
-                                                 <Button size='icon' variant={'ghost'}>
-                                                     <item.icon size={'18'}/>
-                                                 </Button>
-                                             </TooltipTrigger>
-                                             <TooltipContent className="absolute left-6 -top-1">
-                                                 <p> { item.title }</p>
-                                             </TooltipContent>
-                                         </Tooltip>
-                                     </TooltipProvider>
-                                 }
-
-                                 <span className={`${isOpen ? '': 'hidden'} `}>{ item.title }</span>
+                             <Link
+                                 to={item.href}
+                             >
+                                 <TooltipProvider delayDuration={100} >
+                                     <Tooltip  >
+                                         <TooltipTrigger className="relative">
+                                             <Button size='icon' variant={'ghost'}>
+                                                 <item.icon size={'18'}/>
+                                             </Button>
+                                         </TooltipTrigger>
+                                         <TooltipContent className="absolute left-6 -top-1">
+                                             <p> { item.title }</p>
+                                         </TooltipContent>
+                                     </Tooltip>
+                                 </TooltipProvider>
+                                     <motion.span
+                                         variants={{
+                                             open: {display: 'block'},
+                                             close: { display: 'none'}
+                                         }}
+                                         animate={isOpen ? 'open': 'close' }
+                                     >
+                                         { item.title }
+                                     </motion.span>
                              </Link>
                         </Button>
                     );
@@ -107,7 +118,7 @@ const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
                     <UserAccountActionsToggle />
                 </div>
             </div>
-        </aside>
+        </motion.aside>
     )
 });
 
