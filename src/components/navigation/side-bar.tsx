@@ -42,7 +42,8 @@ const SideBar = (({ className, items, ...props }: SidebarNavProps) => {
         <motion.aside
             variants={variants}
             animate={isOpen ? 'open': 'close'}
-            className={`flex flex-col justify-between border-e h-full p-6 ease-in-out duration-500  `}
+            initial={isOpen ? 'open': 'close'}
+            className={`flex flex-col justify-between border-e h-full p-6 `}
         >
             <div className='w-full space-x-2 mb-14 relative'>
                 <Button size="icon" className={`absolute ${isOpen ? 'right-2': 'left-1/2 transform -translate-x-1/2'}`} onClick={() => setIsOpen(!isOpen)}>
