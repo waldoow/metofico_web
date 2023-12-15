@@ -50,7 +50,7 @@ const DashboardLayout: React.FC<{children: React.ReactNode}> = ({ children }) =>
 
                 <Separator />
 
-                <h1 className='text-black dark:text-white text-7xl font-bold tracking-tight my-12'>
+                <h1 className='text-black dark:text-white text-2xl font-bold tracking-tight my-12'>
                     { pageTitle }
                 </h1>
 

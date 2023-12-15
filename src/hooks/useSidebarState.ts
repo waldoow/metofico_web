@@ -1,4 +1,4 @@
-import {useContext} from 'react';
+import { useContext} from 'react';
 import {SidebarContext} from '@/context/sidebar-provider.tsx';
 
 export const useSidebarState = () => {
